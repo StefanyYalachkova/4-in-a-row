@@ -1,0 +1,81 @@
+body {
+  padding: 20px;
+  background-color: #f1d2e0e1;
+}
+
+button[type=submit] {
+  font-family: sans-serif;
+  background-color: rgb(0, 0, 255);
+  padding: 10px;
+  border-radius: 8px;
+  height: 100%;
+  cursor: pointer;
+  margin: 5px;
+  position: relative;
+  left: 5%;
+}
+
+form,
+h1 {
+  text-align: center;
+}
+
+h2 {
+  text-align: inherit;
+}
+
+.player-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-container {
+  align-items: center;
+  justify-content: center;
+}
+
+.row-container {
+  display: flex;
+  margin: -5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.balls-container {
+  display: flex;
+  border: solid;
+  align-items: center;
+  justify-content: center;
+}
+
+.balls {
+  width: auto;
+  height: auto;
+
+}
+
+.firstLine-container {
+  padding-bottom: 12px;
+  align-items: center;
+  justify-content: center;
+  border-style: hidden;
+  outline: none;
+}
+
+.winner-container {
+  text-align: right;
+  padding: 50px;
+
+}
+
+#errorMessage {
+  color: red;
+  font-size: 15px;
+}
+
+#playerField {
+  padding: 20px;
+  font-weight: bold;
+  font-size: 20px;
+}
