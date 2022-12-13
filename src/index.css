@@ -18,16 +18,23 @@ button[type=submit] {
 form,
 h1 {
   text-align: center;
+  padding: 15px;
 }
 
 h2 {
   text-align: inherit;
 }
 
-.player-container {
+.playerOne-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: right;
+}
+
+.playerTwo-container {
+  display: flex;
+  align-items: center;
+  justify-content: left;
 }
 
 .board-container {
@@ -39,7 +46,7 @@ h2 {
   display: flex;
   margin: -5px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end
 }
 
 .balls-container {
@@ -66,7 +73,6 @@ h2 {
 .winner-container {
   text-align: right;
   padding: 50px;
-
 }
 
 #errorMessage {
@@ -74,7 +80,10 @@ h2 {
   font-size: 15px;
 }
 
-#playerField {
+#playerField,
+#rowsField,
+#colsField,
+#nInARowField {
   padding: 20px;
   font-weight: bold;
   font-size: 20px;

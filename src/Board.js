@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { createRef, useState } from "react";
 import { Button, Grid } from '@mui/material';
 import { MoveBall } from "./MoveBall";
 import { SVGBallPlayer1 } from "./SVGBallPlayer1";
@@ -8,12 +8,15 @@ import { getIsBallObjectEmpty } from "./utils";
 
 const Board = (props) => {
 
+    let rowSize = props.boardSize.row;
+    let colSize = props.boardSize.col;
+
     const initialValue = () => {
         const matrixOfObjects = [];
 
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < rowSize; i++) {
             matrixOfObjects[i] = [];
-            for (let j = 0; j < 8; j++) {
+            for (let j = 0; j < colSize; j++) {
                 matrixOfObjects[i][j] = ({ isPlayerOneBall: false, isPlayerTwoBall: false });
             };
         };
@@ -24,6 +27,8 @@ const Board = (props) => {
     const [board, setBoard] = useState(initialValue());
 
     const [restartGame, setRestartGame] = useState('');
+
+    const [winnerBall, setWinnerBall] = useState('');
 
     const displayBoard = (boardState, keyPrefix) => {
         let result = [];
@@ -53,7 +58,7 @@ const Board = (props) => {
         };
 
         let getRowElement = (key, rowIndex) => (
-            <Grid className={'row-container'} xs={12} key={key}>
+            <Grid className={'row-container'} xs={9} key={key}>
                 {getColumns(keyPrefix, rowIndex)}
             </Grid>
         );
@@ -63,7 +68,7 @@ const Board = (props) => {
         };
 
         return result;
-    }
+    };
 
     const displayBall = (element) => {
         if (element.isPlayerOneBall || element.isPlayerTwoBall) {
@@ -116,28 +121,39 @@ const Board = (props) => {
         return isPlayerOneBall || isPlayerTwoBall;
     };
 
-    const getWinnerMessage = () => {
-        const winnerForNow = getWinner(board, props.playerOne.name, props.playerTwo.name);
-        
+    const getWinnerMessage = (newFocusRef) => {
+        const winnerForNow = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
+
         if (winnerForNow) {
             return (
                 <div>
                     <b>{winnerForNow} wins!</b>
-                    <Button variant="contained" type="submit" onClick={renderNewRound}>New Round</Button>
+                    <Button variant="contained" type="submit" onClick={() => renderNewRound(newFocusRef)}>New Round</Button>
                 </div>
             );
         };
     };
 
-    const renderNewRound = () => {
+    const renderNewRound = (newFocusRef) => {
+        let winner = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
+        let ballWinner = '';
+
+        if (winner === props.playerOne.name) {
+            ballWinner = { isPlayerOneBall: true, isPlayerTwoBall: false };
+            setWinnerBall(ballWinner);
+        } else if (winner === props.playerTwo.name) {
+            ballWinner = { isPlayerOneBall: false, isPlayerTwoBall: true };
+            setWinnerBall(ballWinner);
+        };
+
         setRestartGame(true);
         checkPointsForPlayer();
         setBoard(initialValue());
-       
+        newFocusRef.current && newFocusRef.current.focus();
     };
 
     const checkPointsForPlayer = () => {
-        let winner = getWinner(board, props.playerOne.name, props.playerTwo.name);
+        let winner = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
         let result = '';
 
         if (winner === props.playerOne.name) {
@@ -145,16 +161,18 @@ const Board = (props) => {
             props.setPlayerOne({ ...props.playerOne, score: props.playerOne.score + 1 });
         } else if (winner === props.playerTwo.name) {
             result = props.playerTwo.score;
-            props.setPlayerTwo({ ...props.playerTwo, score: props.playerTwo.score + 1 })
+            props.setPlayerTwo({ ...props.playerTwo, score: props.playerTwo.score + 1 });
         };
 
         return result;
     };
 
     const playground = () => {
+        const moveBallRef = createRef();
+
         return (
             <Grid container>
-                <Grid className={'player-container'} item xs={2}>
+                <Grid className={'playerOne-container'} item xs={2}>
                     <h2>{props.playerOne.name}: {props.playerOne.score}</h2>
                 </Grid>
                 <Grid className={'board-container'} item xs={8}>
@@ -162,21 +180,25 @@ const Board = (props) => {
                         displayBoard={displayBoard}
                         handleMoveDown={moveDownBall}
                         handleIsLastCellFull={isLastCellFull}
-                        shouldStop={getWinner(board, props.playerOne.name, props.playerTwo.name)}
+                        shouldStop={getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow })}
                         shouldRestartGame={restartGame}
                         afterGameRestart={setRestartGame}
+                        winnerBall={winnerBall}
+                        rowSize={rowSize}
+                        colSize={colSize}
+                        ref={moveBallRef}
                     />
                     <Grid>
                         {displayBoard(board, 'board')}
                     </Grid>
                 </Grid>
-                <Grid className={'player-container'} item xs={2}>
+                <Grid className={'playerTwo-container'} item xs={2}>
                     <h2>{props.playerTwo.name}: {props.playerTwo.score}</h2>
                 </Grid>
-                <Grid className={'winner-container'} item xs={8}>
-                    {getWinnerMessage()}
+                <Grid className={'winner-container'} item xs={7}>
+                    {getWinnerMessage(moveBallRef)}
                     {(props.playerOne.score === 3 || props.playerTwo.score === 3)
-                        && <h2>Game over! {props.playerOne.score ? `${props.playerOne.name} wins!` : `${props.playerTwo.name} wins!`} </h2>
+                        && <h2>Game over! {props.playerOne.score ? `${props.playerOne.name} won this game!` : `${props.playerTwo.name} won this game!`}</h2>
                     }
                 </Grid>
 

@@ -1,7 +1,8 @@
 import { Grid } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { areBallObjectsEqual } from "./utils"
 
-const MoveBall = (props) => {
+const MoveBall = React.forwardRef((props, ref) => {
 
     const RIGHT_ARROW = 39;
     const LEFT_ARROW = 37;
@@ -10,7 +11,7 @@ const MoveBall = (props) => {
     const S_KEYCODE = 83;
     const D_KEYCODE = 68;
 
-    const INITIAL_VALUE = 3;
+    const INITIAL_VALUE = Math.ceil(props.colSize / 2) - 1;
 
     let playerOneBall = { isPlayerOneBall: true, isPlayerTwoBall: false };
     let playerTwoBall = { isPlayerOneBall: false, isPlayerTwoBall: true };
@@ -30,11 +31,9 @@ const MoveBall = (props) => {
         }
     };
 
-    const firstLine = useRef(null);
-
     useEffect(() => {
-        if (firstLine.current) {
-            firstLine.current.focus();
+        if ((ref || {}).current) {
+            (ref || {}).current.focus();
         };
     }, []);
 
@@ -45,26 +44,28 @@ const MoveBall = (props) => {
             copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: false };
 
             setArray(copy);
-            
         };
 
         if (props.shouldRestartGame) {
             const copy = [...array];
             const currentBallPosition = INITIAL_VALUE;
-            copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: true };
+
+            if (areBallObjectsEqual(props.winnerBall, playerOneBall)) {
+                copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: true };
+            } else {
+                copy[currentBallPosition] = { isPlayerOneBall: true, isPlayerTwoBall: false };
+            };
+
             setArray(copy);
 
             props.afterGameRestart(false);
-            
-        }
+        };
     }, [props.shouldStop, props.shouldRestartGame]);
-
-   
 
     const getInitialValue = (ball) => {
         const arrayOfObjects = [];
 
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < props.colSize; i++) {
             if (i === INITIAL_VALUE) {
                 arrayOfObjects.push(ball);
             } else {
@@ -149,12 +150,12 @@ const MoveBall = (props) => {
     };
 
     return (
-        <span className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={firstLine} >
+        <span className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
             <Grid className={'firstLine-container'} item xs={12}>
                 {props.displayBoard([array], 'move')}
             </Grid>
         </span>
     );
-};
+});
 
 export { MoveBall };

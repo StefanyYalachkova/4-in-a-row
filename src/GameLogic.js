@@ -1,9 +1,10 @@
 import { Grid } from "@mui/material";
 import { areBallObjectsEqual, getIsBallObjectEmpty } from "./utils";
 
-const getWinner = (board = [[]], playerOneName, playerTwoName) => {
+const getWinner = (board = [[]], additionalParams = {}) => {
+    const { playerOneName, playerTwoName, nInARow } = additionalParams;
 
-    const winner = checkAll(board);
+    const winner = checkAll(board, nInARow);
     let winnerForThisRound = '';
 
     if (winner.isPlayerOneBall) {
@@ -15,27 +16,31 @@ const getWinner = (board = [[]], playerOneName, playerTwoName) => {
     return winnerForThisRound;
 };
 
-const checkAll = (board) => {
-    const winner = (getVerticalWinnerCell(board)
-        || getHorizontalWinnerCell(board)
-        || getRightDiagonalWinnerCell(board)
-        || getLeftDiagonalWinnerCell(board)
+const checkAll = (board, nInARow) => {
+
+    const winner = (getVerticalWinnerCell(board, nInARow)
+        || getHorizontalWinnerCell(board, nInARow)
+        || getRightDiagonalWinnerCell(board, nInARow)
+        || getLeftDiagonalWinnerCell(board, nInARow)
         || {});
 
     return winner;
 };
-
-const getVerticalWinnerCell = (board) => {
+const getVerticalWinnerCell = (board, nInARow) => {
     let result = null;
 
-    for (let row = (Math.ceil(board.length / 2) - 1); row < board.length; row++) {
-        for (let col = 0; col < board.length; col++) {
+    for (let row = Math.max((Math.ceil(board.length / 2) - 1), nInARow - 1); row < board.length; row++) {
+        for (let col = 0; col < board[row].length; col++) {
             if (!getIsBallObjectEmpty(board[row][col])) {
-                if (
-                    areBallObjectsEqual(board[row][col], board[row - 1][col]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 2][col]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 3][col])
-                ) {
+                let hasWinningChance = true;
+                let i = 1;
+
+                while (hasWinningChance && i < nInARow) {
+                    hasWinningChance = areBallObjectsEqual(board[row][col], board[row - i][col])
+                    i++;
+                };
+
+                if (hasWinningChance) {
                     result = board[row][col];
                 };
             };
@@ -45,17 +50,21 @@ const getVerticalWinnerCell = (board) => {
     return result;
 };
 
-const getHorizontalWinnerCell = (board) => {
+const getHorizontalWinnerCell = (board, nInARow) => {
     let result = null;
 
     for (let row = 0; row < board.length; row++) {
-        for (let col = 0; col < (board.length - 3); col++) {
+        for (let col = 0; col < (board[row].length - nInARow + 1); col++) {
             if (!getIsBallObjectEmpty(board[row][col])) {
-                if (
-                    areBallObjectsEqual(board[row][col], board[row][col + 1]) &&
-                    areBallObjectsEqual(board[row][col], board[row][col + 2]) &&
-                    areBallObjectsEqual(board[row][col], board[row][col + 3])
-                ) {
+                let hasWinningChance = true;
+                let i = 1;
+
+                while (hasWinningChance && i < nInARow) {
+                    hasWinningChance = areBallObjectsEqual(board[row][col], board[row][col + i]);
+                    i++;
+                };
+
+                if (hasWinningChance) {
                     result = board[row][col];
                 };
             };
@@ -65,17 +74,21 @@ const getHorizontalWinnerCell = (board) => {
     return result;
 };
 
-const getRightDiagonalWinnerCell = (board) => {
+const getRightDiagonalWinnerCell = (board, nInARow) => {
     let result = null;
 
-    for (let row = (Math.ceil(board.length / 2) - 1); row < board.length; row++) {
-        for (let col = 0; col < (board.length - 3); col++) {
+    for (let row = Math.max((Math.ceil(board.length / 2) - 1), nInARow - 1); row < board.length; row++) {
+        for (let col = 0; col < (board[row].length - nInARow + 1); col++) {
             if (!getIsBallObjectEmpty(board[row][col])) {
-                if (
-                    areBallObjectsEqual(board[row][col], board[row - 1][col + 1]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 2][col + 2]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 3][col + 3])
-                ) {
+                let hasWinningChance = true;
+                let i = 1;
+
+                while (hasWinningChance && i < nInARow) {
+                    hasWinningChance = areBallObjectsEqual(board[row][col], board[row - i][col + i]);
+                    i++;
+                };
+
+                if (hasWinningChance) {
                     result = board[row][col];
                 };
             };
@@ -85,17 +98,21 @@ const getRightDiagonalWinnerCell = (board) => {
     return result;
 };
 
-const getLeftDiagonalWinnerCell = (board) => {
+const getLeftDiagonalWinnerCell = (board, nInARow) => {
     let result = null;
 
-    for (let row = (Math.ceil(board.length / 2) - 1); row < board.length; row++) {
-        for (let col = (Math.ceil(board.length / 2) - 1); col < board.length; col++) {
+    for (let row = (Math.max((Math.ceil(board.length / 2) - 1), nInARow - 1)); row < board.length; row++) {
+        for (let col = (Math.max((Math.ceil(board.length / 2) - 1), nInARow - 1)); col < board[row].length; col++) {
             if (!getIsBallObjectEmpty(board[row][col])) {
-                if (
-                    areBallObjectsEqual(board[row][col], board[row - 1][col - 1]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 2][col - 2]) &&
-                    areBallObjectsEqual(board[row][col], board[row - 3][col - 3])
-                ) {
+                let hasWinningChance = true;
+                let i = 1;
+
+                while (hasWinningChance && i < nInARow) {
+                    hasWinningChance = areBallObjectsEqual(board[row][col], board[row - i][col - i]);
+                    i++;
+                };
+
+                if (hasWinningChance) {
                     result = board[row][col];
                 };
             };
