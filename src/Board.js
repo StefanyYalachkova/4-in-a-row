@@ -1,10 +1,10 @@
-import React, { createRef, useState } from "react";
-import { Button, Grid } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { Grid } from '@mui/material';
 import { MoveBall } from "./MoveBall";
 import { SVGBallPlayer1 } from "./SVGBallPlayer1";
 import { SVGBallPlayer2 } from "./SVGBallPlayer2";
-import { getWinner } from "./GameLogic";
 import { getIsBallObjectEmpty } from "./utils";
+import { getWinner } from "./gameLogic";
 
 const Board = (props) => {
 
@@ -26,9 +26,18 @@ const Board = (props) => {
 
     const [board, setBoard] = useState(initialValue());
 
-    const [restartGame, setRestartGame] = useState('');
+    useEffect(() => {
+        // if (props.shouldReset) {
+        //     setBoard(initialValue());
+        // };
 
-    const [winnerBall, setWinnerBall] = useState('');
+        if (props.restartGame) {
+            setBoard(initialValue());
+        };
+
+        props.runCheck(board);
+
+    }, [board, props.restartGame]);
 
     const displayBoard = (boardState, keyPrefix) => {
         let result = [];
@@ -72,12 +81,14 @@ const Board = (props) => {
 
     const displayBall = (element) => {
         if (element.isPlayerOneBall || element.isPlayerTwoBall) {
+
             return (
                 element.isPlayerOneBall === true
                     ? <SVGBallPlayer1 />
                     : <SVGBallPlayer2 />
             );
         } else {
+
             return (
                 <svg>
                     <circle
@@ -121,88 +132,26 @@ const Board = (props) => {
         return isPlayerOneBall || isPlayerTwoBall;
     };
 
-    const getWinnerMessage = (newFocusRef) => {
-        const winnerForNow = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
-
-        if (winnerForNow) {
-            return (
-                <div>
-                    <b>{winnerForNow} wins!</b>
-                    <Button variant="contained" type="submit" onClick={() => renderNewRound(newFocusRef)}>New Round</Button>
-                </div>
-            );
-        };
-    };
-
-    const renderNewRound = (newFocusRef) => {
-        let winner = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
-        let ballWinner = '';
-
-        if (winner === props.playerOne.name) {
-            ballWinner = { isPlayerOneBall: true, isPlayerTwoBall: false };
-            setWinnerBall(ballWinner);
-        } else if (winner === props.playerTwo.name) {
-            ballWinner = { isPlayerOneBall: false, isPlayerTwoBall: true };
-            setWinnerBall(ballWinner);
-        };
-
-        setRestartGame(true);
-        checkPointsForPlayer();
-        setBoard(initialValue());
-        newFocusRef.current && newFocusRef.current.focus();
-    };
-
-    const checkPointsForPlayer = () => {
-        let winner = getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow });
-        let result = '';
-
-        if (winner === props.playerOne.name) {
-            result = props.playerOne.score;
-            props.setPlayerOne({ ...props.playerOne, score: props.playerOne.score + 1 });
-        } else if (winner === props.playerTwo.name) {
-            result = props.playerTwo.score;
-            props.setPlayerTwo({ ...props.playerTwo, score: props.playerTwo.score + 1 });
-        };
-
-        return result;
-    };
-
     const playground = () => {
-        const moveBallRef = createRef();
 
         return (
-            <Grid container>
-                <Grid className={'playerOne-container'} item xs={2}>
-                    <h2>{props.playerOne.name}: {props.playerOne.score}</h2>
+            <div>
+                <MoveBall
+                    displayBoard={displayBoard}
+                    handleMoveDown={moveDownBall}
+                    handleIsLastCellFull={isLastCellFull}
+                    shouldStop={getWinner(board, { playerOneName: props.playersProps.playerOne.name, playerTwoName: props.playersProps.playerTwo.name, nInARow: props.nInARow })}
+                    shouldRestartGame={props.restartGame}
+                    afterGameRestart={props.setRestartGame}
+                    winnerBall={props.winnerBall}
+                    rowSize={rowSize}
+                    colSize={colSize}
+                    ref={props.moveBallReff}
+                />
+                <Grid>
+                    {displayBoard(board, 'board')}
                 </Grid>
-                <Grid className={'board-container'} item xs={8}>
-                    <MoveBall
-                        displayBoard={displayBoard}
-                        handleMoveDown={moveDownBall}
-                        handleIsLastCellFull={isLastCellFull}
-                        shouldStop={getWinner(board, { playerOneName: props.playerOne.name, playerTwoName: props.playerTwo.name, nInARow: props.nInARow })}
-                        shouldRestartGame={restartGame}
-                        afterGameRestart={setRestartGame}
-                        winnerBall={winnerBall}
-                        rowSize={rowSize}
-                        colSize={colSize}
-                        ref={moveBallRef}
-                    />
-                    <Grid>
-                        {displayBoard(board, 'board')}
-                    </Grid>
-                </Grid>
-                <Grid className={'playerTwo-container'} item xs={2}>
-                    <h2>{props.playerTwo.name}: {props.playerTwo.score}</h2>
-                </Grid>
-                <Grid className={'winner-container'} item xs={7}>
-                    {getWinnerMessage(moveBallRef)}
-                    {(props.playerOne.score === 3 || props.playerTwo.score === 3)
-                        && <h2>Game over! {props.playerOne.score ? `${props.playerOne.name} won this game!` : `${props.playerTwo.name} won this game!`}</h2>
-                    }
-                </Grid>
-
-            </Grid>
+            </div>
         );
     };
 

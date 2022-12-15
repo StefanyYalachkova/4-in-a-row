@@ -88,3 +88,8 @@ h2 {
   font-weight: bold;
   font-size: 20px;
 }
+
+.player-container {
+  text-align: center;
+  font-size: xx-large;
+}

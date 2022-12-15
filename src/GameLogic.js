@@ -1,4 +1,3 @@
-import { Grid } from "@mui/material";
 import { areBallObjectsEqual, getIsBallObjectEmpty } from "./utils";
 
 const getWinner = (board = [[]], additionalParams = {}) => {

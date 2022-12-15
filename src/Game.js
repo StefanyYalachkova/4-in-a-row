@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import { Grid } from '@mui/material';
+import React, { createRef, useEffect, useState } from 'react';
 import { Board } from './Board';
 import { BoardSize } from './BoardSize';
+import { DisplayPlayerScore } from './DisplayPlayerScore';
+import { getWinner } from './gameLogic';
 import { LoginForm } from './LoginForm';
+import { Winner } from './Winner';
 
 const Game = () => {
 
-    const [boardSize, setBoardSize] = useState({ row: 8, col: 8 });
-    const [nInARow, setNInARow] = useState({ number: 4 });
+    const [boardSize, setBoardSize] = useState({ row: 0, col: 0 });
+    const [nInARow, setNInARow] = useState(0);
 
     const [playerOne, setPlayerOne] = useState({ name: '', score: 0 });
     const [playerTwo, setPlayerTwo] = useState({ name: '', score: 0 });
@@ -22,6 +26,17 @@ const Game = () => {
     const [gameStarted, setGameStarted] = useState(false);
 
     const [viewLoginForm, setViewLoginForm] = useState(false);
+
+    const [viewBoard, setViewBoard] = useState(false);
+
+    const [winner, setWinner] = useState('');
+
+    const [winnerBall, setWinnerBall] = useState('');
+    const [restartGame, setRestartGame] = useState('');
+
+    const playersProps = { playerOne, setPlayerOne, playerTwo, setPlayerTwo };
+
+    const moveBallRef = createRef();
 
     const isValidUsername = (name, value) => {
         const isInvalidName = value.length < 3;
@@ -78,10 +93,10 @@ const Game = () => {
                 setBoardSize({ ...boardSize, row: value });
                 break;
             case 'columns':
-                setBoardSize({ ...boardSize, col: value })
+                setBoardSize({ ...boardSize, col: value });
                 break;
             case 'nInARows':
-                setNInARow({ number: value })
+                setNInARow(value);
                 break;
             default:
                 break;
@@ -96,6 +111,43 @@ const Game = () => {
 
     const handleStartGame = () => {
         setGameStarted(true);
+        setViewBoard(true);
+    };
+
+    const renderNewRound = (newFocusRef, winner) => {
+        let ballWinner = '';
+
+        if (winner === playerOne.name) {
+            ballWinner = { isPlayerOneBall: true, isPlayerTwoBall: false };
+            setWinnerBall(ballWinner);
+        } else if (winner === playerTwo.name) {
+            ballWinner = { isPlayerOneBall: false, isPlayerTwoBall: true };
+            setWinnerBall(ballWinner);
+        };
+
+        setRestartGame(true);
+        checkPointsForPlayer(winner);
+        //props.setBoard(props.initialValue());
+        newFocusRef.current && newFocusRef.current.focus();
+    };
+
+    const checkPointsForPlayer = (winner) => {
+        let result = '';
+
+        if (winner === playerOne.name) {
+            result = playerOne.score;
+            setPlayerOne({ ...playerOne, score: playerOne.score + 1 });
+        } else if (winner === playerTwo.name) {
+            result = playerTwo.score;
+            setPlayerTwo({ ...playerTwo, score: playerTwo.score + 1 });
+        };
+
+        return result;
+    };
+
+    const runBoardCheck = (board) => {
+        const winner = getWinner(board, { playerOneName: playerOne.name, playerTwoName: playerTwo.name, nInARow: nInARow });
+        winner ? setWinner(winner) : setWinner('');
     };
 
     const renderLoginForm = () => {
@@ -116,26 +168,81 @@ const Game = () => {
                         isRowNumberValid={isRowNumberValid}
                         isColNumberValid={isColNumberValid}
                         isNinARowValid={isNinARowValid}
-                        shouldDisabledButtonBoardSize={boardSize.row < 4 || boardSize.col < 4 || nInARow.number < 2}
+                        shouldDisabledButtonBoardSize={boardSize.row < 4 || boardSize.col < 4 || nInARow < 2}
                     />
                 }
             </div>
         );
     };
 
+    const boardPage = () => {
+        return (
+            <Grid container>
+                <Grid className={'playerOne-container'} item xs={2}>
+                    <DisplayPlayerScore
+                        player={playersProps.playerOne}
+                        setPlayer={playersProps.setPlayerOne}
+                    />
+                </Grid>
+                <Grid className={'board-container'} item xs={8}>
+                    <Board
+                        playersProps={playersProps}
+                        boardSize={boardSize}
+                        setBoardSize={setBoardSize}
+                        nInARow={nInARow}
+                        runCheck={runBoardCheck}
+                        shouldReset={winner}
+                        moveBallReff={moveBallRef}
+                        restartGame={restartGame}
+                        setRestartGame={setRestartGame}
+                        winnerBall={winnerBall}
+                    />
+                </Grid>
+                <Grid className={'playerTwo-container'} item xs={2}>
+                    <DisplayPlayerScore
+                        player={playersProps.playerTwo}
+                        setPlayer={playersProps.setPlayerTwo}
+                    />
+                </Grid>
+                <Grid className={'winner-container'} item xs={7}>
+                    <Winner
+                        winner={winner}
+                        playersProps={playersProps}
+                        nInARow={nInARow}
+                        moveBallRef={moveBallRef}
+                        renderNewRound={renderNewRound}
+                        setViewBoard={setViewBoard}
+                    />
+                </Grid>
+
+
+            </Grid>
+        );
+    };
+
+    const renderBoard = () => {
+        return (
+            <div>
+                {viewBoard
+                    ? boardPage()
+                    : <Winner
+                        winner={winner}
+                        playersProps={playersProps}
+                        nInARow={nInARow}
+                        moveBallRef={moveBallRef}
+                        renderNewRound={renderNewRound}
+                        setViewBoard={setViewBoard}
+                    />
+                }
+            </div >
+        );
+    };
+
     return (
         <div>
-            <h1>{nInARow.number} in a row</h1>
+            <h1>{nInARow} in a row</h1>
             {gameStarted
-                ? <Board
-                    playerOne={playerOne}
-                    setPlayerOne={setPlayerOne}
-                    playerTwo={playerTwo}
-                    setPlayerTwo={setPlayerTwo}
-                    boardSize={boardSize}
-                    setBoardSize={setBoardSize}
-                    nInARow={nInARow.number}
-                />
+                ? renderBoard()
                 : renderLoginForm()
             }
         </div>
