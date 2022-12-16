@@ -1,5 +1,5 @@
 import { Grid } from '@mui/material';
-import React, { createRef, useEffect, useState } from 'react';
+import React, { createRef, useState } from 'react';
 import { Board } from './Board';
 import { BoardSize } from './BoardSize';
 import { DisplayPlayerScore } from './DisplayPlayerScore';
@@ -9,63 +9,47 @@ import { Winner } from './Winner';
 
 const Game = () => {
 
-    const [boardSize, setBoardSize] = useState({ row: 0, col: 0 });
-    const [nInARow, setNInARow] = useState(0);
+    const [boardSize, setBoardSize] = useState({ row: 8, col: 8 });
+    const [nInARow, setNInARow] = useState(4);
 
-    const [playerOne, setPlayerOne] = useState({ name: '', score: 0 });
-    const [playerTwo, setPlayerTwo] = useState({ name: '', score: 0 });
-
-    const [isFirstInputValid, setIsFirstInputValid] = useState(true);
-    const [isSecondInputValid, setIsSecondInputValid] = useState(true);
-
-    const [isRowNumberValid, setIsRowNumberValid] = useState(true);
-    const [isColNumberValid, setIsColNumberValid] = useState(true);
-
-    const [isNinARowValid, setIsNinARowValid] = useState(true);
+    const [playerOne, setPlayerOne] = useState({ name: 'playerOne', score: 0 });
+    const [playerTwo, setPlayerTwo] = useState({ name: 'playerTwo', score: 0 });
 
     const [gameStarted, setGameStarted] = useState(false);
+    const [restartGame, setRestartGame] = useState('');
 
     const [viewLoginForm, setViewLoginForm] = useState(false);
-
     const [viewBoard, setViewBoard] = useState(false);
 
     const [winner, setWinner] = useState('');
-
     const [winnerBall, setWinnerBall] = useState('');
-    const [restartGame, setRestartGame] = useState('');
 
     const playersProps = { playerOne, setPlayerOne, playerTwo, setPlayerTwo };
 
     const moveBallRef = createRef();
 
     const isValidUsername = (name, value) => {
-        const isInvalidName = value.length < 3;
+        const isValidName = value.length >= 3;
 
         switch (name) {
             case 'playerOne':
-                setIsFirstInputValid(!isInvalidName);
-                break;
             case 'playerTwo':
-                setIsSecondInputValid(!isInvalidName);
-                break;
+                return isValidName;
             default:
                 break;
         };
     };
 
     const isValidNumber = (name, value) => {
-        const isInvalidNumber = Number(value) < 4;
-        const isInvalidNInARowNumber = Number(value) < 2;
+        const isValid = Number(value) >= 4;
+        const isValidNInARow = Number(value) >= 2;
+
         switch (name) {
             case 'rows':
-                setIsRowNumberValid(!isInvalidNumber);
-                break;
             case 'columns':
-                setIsColNumberValid(!isInvalidNumber);
-                break;
+                return isValid;
             case 'nInARows':
-                setIsNinARowValid(!isInvalidNInARowNumber);
-                break;
+                return isValidNInARow;
             default:
                 break;
         };
@@ -127,7 +111,8 @@ const Game = () => {
 
         setRestartGame(true);
         checkPointsForPlayer(winner);
-        //props.setBoard(props.initialValue());
+        setWinner('');
+
         newFocusRef.current && newFocusRef.current.focus();
     };
 
@@ -147,7 +132,7 @@ const Game = () => {
 
     const runBoardCheck = (board) => {
         const winner = getWinner(board, { playerOneName: playerOne.name, playerTwoName: playerTwo.name, nInARow: nInARow });
-        winner ? setWinner(winner) : setWinner('');
+        winner && setWinner(winner);
     };
 
     const renderLoginForm = () => {
@@ -157,17 +142,17 @@ const Game = () => {
                     ? <LoginForm
                         setName={handleName}
                         onClick={handleStartGame}
-                        isFirstInputValid={isFirstInputValid}
-                        isSecondInputValid={isSecondInputValid}
+                        isFirstInputValid={isValidUsername('playerOne', playerOne.name)}
+                        isSecondInputValid={isValidUsername('playerTwo', playerTwo.name)}
                         shouldDisabledButton={playerOne.name.length < 3 || playerTwo.name.length < 3}
                     />
                     : <BoardSize
                         setSize={handleBoardSize}
                         onClick={handleLoginForm}
                         nInARow={nInARow}
-                        isRowNumberValid={isRowNumberValid}
-                        isColNumberValid={isColNumberValid}
-                        isNinARowValid={isNinARowValid}
+                        isRowNumberValid={isValidNumber('rows', boardSize.row)}
+                        isColNumberValid={isValidNumber('columns', boardSize.col)}
+                        isNinARowValid={isValidNumber('nInARows', nInARow)}
                         shouldDisabledButtonBoardSize={boardSize.row < 4 || boardSize.col < 4 || nInARow < 2}
                     />
                 }
@@ -186,11 +171,10 @@ const Game = () => {
                 </Grid>
                 <Grid className={'board-container'} item xs={8}>
                     <Board
-                        playersProps={playersProps}
                         boardSize={boardSize}
                         setBoardSize={setBoardSize}
                         nInARow={nInARow}
-                        runCheck={runBoardCheck}
+                        runOnUpdate={runBoardCheck}
                         shouldReset={winner}
                         moveBallReff={moveBallRef}
                         restartGame={restartGame}

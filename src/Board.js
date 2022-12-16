@@ -4,7 +4,6 @@ import { MoveBall } from "./MoveBall";
 import { SVGBallPlayer1 } from "./SVGBallPlayer1";
 import { SVGBallPlayer2 } from "./SVGBallPlayer2";
 import { getIsBallObjectEmpty } from "./utils";
-import { getWinner } from "./gameLogic";
 
 const Board = (props) => {
 
@@ -27,16 +26,11 @@ const Board = (props) => {
     const [board, setBoard] = useState(initialValue());
 
     useEffect(() => {
-        // if (props.shouldReset) {
-        //     setBoard(initialValue());
-        // };
-
         if (props.restartGame) {
             setBoard(initialValue());
+        } else {
+            props.runOnUpdate(board);
         };
-
-        props.runCheck(board);
-
     }, [board, props.restartGame]);
 
     const displayBoard = (boardState, keyPrefix) => {
@@ -140,7 +134,8 @@ const Board = (props) => {
                     displayBoard={displayBoard}
                     handleMoveDown={moveDownBall}
                     handleIsLastCellFull={isLastCellFull}
-                    shouldStop={getWinner(board, { playerOneName: props.playersProps.playerOne.name, playerTwoName: props.playersProps.playerTwo.name, nInARow: props.nInARow })}
+
+                    shouldStop={props.shouldReset}
                     shouldRestartGame={props.restartGame}
                     afterGameRestart={props.setRestartGame}
                     winnerBall={props.winnerBall}
