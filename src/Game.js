@@ -5,6 +5,7 @@ import { BoardSize } from './BoardSize';
 import { DisplayPlayerScore } from './DisplayPlayerScore';
 import { getWinner } from './gameLogic';
 import { LoginForm } from './LoginForm';
+import { MoveBall } from './MoveBall';
 import { Winner } from './Winner';
 
 const Game = () => {
@@ -113,7 +114,7 @@ const Game = () => {
         checkPointsForPlayer(winner);
         setWinner('');
 
-        newFocusRef.current && newFocusRef.current.focus();
+        newFocusRef && newFocusRef.current && newFocusRef.current.focus();
     };
 
     const checkPointsForPlayer = (winner) => {
@@ -133,6 +134,25 @@ const Game = () => {
     const runBoardCheck = (board) => {
         const winner = getWinner(board, { playerOneName: playerOne.name, playerTwoName: playerTwo.name, nInARow: nInARow });
         winner && setWinner(winner);
+    };
+
+    const getMoveBallComponent = (props) => {
+        const { displayBoard, handleMoveDown, handleIsLastCellFull } = props;
+
+        return (
+            <MoveBall
+                displayBoard={displayBoard}
+                handleMoveDown={handleMoveDown}
+                handleIsLastCellFull={handleIsLastCellFull}
+                ref={moveBallRef}
+                shouldStop={winner}
+                shouldRestartGame={restartGame}
+                afterGameRestart={setRestartGame}
+                winnerBall={winnerBall}
+                rowSize={1}
+                colSize={boardSize.col}
+            />
+        );
     };
 
     const renderLoginForm = () => {
@@ -171,12 +191,11 @@ const Game = () => {
                 </Grid>
                 <Grid className={'board-container'} item xs={8}>
                     <Board
+                        getInjectedComponent={getMoveBallComponent}
                         boardSize={boardSize}
-                        setBoardSize={setBoardSize}
                         nInARow={nInARow}
                         runOnUpdate={runBoardCheck}
                         shouldReset={winner}
-                        moveBallReff={moveBallRef}
                         restartGame={restartGame}
                         setRestartGame={setRestartGame}
                         winnerBall={winnerBall}
@@ -198,8 +217,6 @@ const Game = () => {
                         setViewBoard={setViewBoard}
                     />
                 </Grid>
-
-
             </Grid>
         );
     };

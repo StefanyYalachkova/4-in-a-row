@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Grid } from '@mui/material';
-import { MoveBall } from "./MoveBall";
 import { SVGBallPlayer1 } from "./SVGBallPlayer1";
 import { SVGBallPlayer2 } from "./SVGBallPlayer2";
 import { getIsBallObjectEmpty } from "./utils";
@@ -126,23 +125,25 @@ const Board = (props) => {
         return isPlayerOneBall || isPlayerTwoBall;
     };
 
+    const renderInjectedComponent = () => {
+        let result = null;
+
+        if (props.getInjectedComponent) {
+            result = props.getInjectedComponent({
+                handleMoveDown: moveDownBall,
+                handleIsLastCellFull: isLastCellFull,
+                displayBoard: displayBoard
+            });
+        };
+
+        return result;
+    };
+
     const playground = () => {
 
         return (
             <div>
-                <MoveBall
-                    displayBoard={displayBoard}
-                    handleMoveDown={moveDownBall}
-                    handleIsLastCellFull={isLastCellFull}
-
-                    shouldStop={props.shouldReset}
-                    shouldRestartGame={props.restartGame}
-                    afterGameRestart={props.setRestartGame}
-                    winnerBall={props.winnerBall}
-                    rowSize={rowSize}
-                    colSize={colSize}
-                    ref={props.moveBallReff}
-                />
+               {renderInjectedComponent()}
                 <Grid>
                     {displayBoard(board, 'board')}
                 </Grid>

@@ -25,6 +25,7 @@ const checkAll = (board, nInARow) => {
 
     return winner;
 };
+
 const getVerticalWinnerCell = (board, nInARow) => {
     let result = null;
 

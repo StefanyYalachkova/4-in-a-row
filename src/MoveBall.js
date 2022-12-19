@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Board } from "./Board";
 import { areBallObjectsEqual } from "./utils"
 
 const MoveBall = React.forwardRef((props, ref) => {
@@ -151,6 +152,7 @@ const MoveBall = React.forwardRef((props, ref) => {
 
     return (
         <span className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
+            
             <Grid className={'firstLine-container'} item xs={12}>
                 {props.displayBoard([array], 'move')}
             </Grid>
