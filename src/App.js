@@ -1,13 +1,9 @@
 import { Game } from './Game';
-//import './App.css';
 
 const App = () => {
-
   return (
-    <div>
-      <Game />
-    </div>
+    <Game />
   );
-}
+};
 
 export default App;

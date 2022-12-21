@@ -1,7 +1,27 @@
 import React from "react";
 import { Button, TextField } from '@mui/material';
+import { MIN_VALID_NAME_LENGTH } from "./constValue";
+
+const PlayerField = (props) => {
+    const { setName, isInputValid, name, player } = props;
+
+    return (
+        <>
+            <span id="playerField">{player} :</span>
+            <TextField
+                type="text"
+                player={player}
+                name={name}
+                onChange={setName}
+                helperText={isInputValid ? '' : <span className="errorMessage">Need atleast 3 letters.</span>}
+            />
+        </>
+    );
+};
 
 const LoginForm = (props) => {
+    const { playerOne, playerTwo } = props.playersProps;
+    const shouldDisabledButton = playerOne.name.length < MIN_VALID_NAME_LENGTH || playerTwo.name.length < MIN_VALID_NAME_LENGTH;
 
     const handleConfirm = (event) => {
         event.preventDefault();
@@ -12,24 +32,22 @@ const LoginForm = (props) => {
         <div>
             <form>
                 <h1>Players :</h1>
-                <span id="playerField">Player 1:</span>
-                <TextField
-                    type="text"
+                <PlayerField
+                    isInputValid={props.isFirstInputValid}
+                    setName={props.setName}
                     name="playerOne"
-                    onChange={props.setName}
-                    helperText={props.isFirstInputValid ? '' : <span id="errorMessage">Need atleast 3 letters.</span>}
+                    player={'Player 1'}
                 />
-                <span id="playerField">Player 2:</span>
-                <TextField
-                    type="text"
+                <PlayerField
+                    isInputValid={props.isSecondInputValid}
+                    setName={props.setName}
                     name="playerTwo"
-                    onChange={props.setName}
-                    helperText={props.isSecondInputValid ? '' : <span id="errorMessage">Need atleast 3 letters.</span>}
+                    player={'Player 2'}
                 />
-                <Button disabled={props.shouldDisabledButton} variant="contained" type="submit" onClick={handleConfirm}> Confirm </Button>
+                <Button disabled={shouldDisabledButton} variant="contained" type="submit" onClick={handleConfirm}> Confirm </Button>
             </form>
         </div>
     );
 };
 
-export { LoginForm };
+export { LoginForm, PlayerField };

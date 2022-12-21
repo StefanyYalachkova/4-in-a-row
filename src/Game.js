@@ -1,23 +1,24 @@
 import { Grid } from '@mui/material';
 import React, { createRef, useState } from 'react';
 import { Board } from './Board';
-import { BoardSize } from './BoardSize';
-import { DisplayPlayerScore } from './DisplayPlayerScore';
-import { getWinner } from './gameLogic';
+import { BoardSizeForm } from './BoardSizeForm';
+import { PlayerScore } from './PlayerScore';
+import { getWinnerForThisRound } from './boardRenderUtils';
 import { LoginForm } from './LoginForm';
 import { MoveBall } from './MoveBall';
-import { Winner } from './Winner';
+import { isValidNumber, isValidUsername } from './gameUtils';
+import { EndGameInfo } from './EndGameInfo';
+import { INITIAL_COL_NUMBER, INITIAL_ROW_NUMBER, INITIAL_WINCOUNT_NUMBER, PLAYER_ONE, PLAYER_TWO } from './constValue';
 
 const Game = () => {
+    const [boardSize, setBoardSize] = useState({ row: INITIAL_ROW_NUMBER, col: INITIAL_COL_NUMBER });
+    const [winCount, setWinCount] = useState(INITIAL_WINCOUNT_NUMBER);
 
-    const [boardSize, setBoardSize] = useState({ row: 8, col: 8 });
-    const [nInARow, setNInARow] = useState(4);
-
-    const [playerOne, setPlayerOne] = useState({ name: 'playerOne', score: 0 });
-    const [playerTwo, setPlayerTwo] = useState({ name: 'playerTwo', score: 0 });
+    const [playerOne, setPlayerOne] = useState({ name: PLAYER_ONE, score: 0 });
+    const [playerTwo, setPlayerTwo] = useState({ name: PLAYER_TWO, score: 0 });
 
     const [gameStarted, setGameStarted] = useState(false);
-    const [restartGame, setRestartGame] = useState('');
+    const [restartGame, setRestartGame] = useState(false);
 
     const [viewLoginForm, setViewLoginForm] = useState(false);
     const [viewBoard, setViewBoard] = useState(false);
@@ -29,46 +30,17 @@ const Game = () => {
 
     const moveBallRef = createRef();
 
-    const isValidUsername = (name, value) => {
-        const isValidName = value.length >= 3;
-
-        switch (name) {
-            case 'playerOne':
-            case 'playerTwo':
-                return isValidName;
-            default:
-                break;
-        };
-    };
-
-    const isValidNumber = (name, value) => {
-        const isValid = Number(value) >= 4;
-        const isValidNInARow = Number(value) >= 2;
-
-        switch (name) {
-            case 'rows':
-            case 'columns':
-                return isValid;
-            case 'nInARows':
-                return isValidNInARow;
-            default:
-                break;
-        };
-    };
-
-    const handleName = (event) => {
+    const onFormLogin = (event) => {
         const { name, value } = event.target;
 
-        isValidUsername(name, value);
-
         return (
-            name === "playerOne"
+            name === PLAYER_ONE
                 ? setPlayerOne({ ...playerOne, name: value })
                 : setPlayerTwo({ ...playerTwo, name: value })
         );
     };
 
-    const handleBoardSize = (event) => {
+    const onGameStart = (event) => {
         const { name, value } = event.target;
 
         isValidNumber(name, value);
@@ -80,8 +52,8 @@ const Game = () => {
             case 'columns':
                 setBoardSize({ ...boardSize, col: value });
                 break;
-            case 'nInARows':
-                setNInARow(value);
+            case 'winCount':
+                setWinCount(value);
                 break;
             default:
                 break;
@@ -132,8 +104,11 @@ const Game = () => {
     };
 
     const runBoardCheck = (board) => {
-        const winner = getWinner(board, { playerOneName: playerOne.name, playerTwoName: playerTwo.name, nInARow: nInARow });
-        winner && setWinner(winner);
+        const winner = getWinnerForThisRound(board, { playerOneName: playerOne.name, playerTwoName: playerTwo.name, winCount: winCount });
+
+        if (winner !== {}) {
+            winner && setWinner(winner);
+        };
     };
 
     const getMoveBallComponent = (props) => {
@@ -160,20 +135,21 @@ const Game = () => {
             <div>
                 {viewLoginForm
                     ? <LoginForm
-                        setName={handleName}
+                        setName={onFormLogin}
                         onClick={handleStartGame}
-                        isFirstInputValid={isValidUsername('playerOne', playerOne.name)}
-                        isSecondInputValid={isValidUsername('playerTwo', playerTwo.name)}
-                        shouldDisabledButton={playerOne.name.length < 3 || playerTwo.name.length < 3}
+                        isFirstInputValid={isValidUsername(PLAYER_ONE, playerOne.name)}
+                        isSecondInputValid={isValidUsername(PLAYER_TWO, playerTwo.name)}
+                        playersProps={playersProps}
                     />
-                    : <BoardSize
-                        setSize={handleBoardSize}
+                    : <BoardSizeForm
+                        setSize={onGameStart}
                         onClick={handleLoginForm}
-                        nInARow={nInARow}
+                        winCount={winCount}
+                        rowSize={boardSize.row}
+                        colSize={boardSize.col}
                         isRowNumberValid={isValidNumber('rows', boardSize.row)}
                         isColNumberValid={isValidNumber('columns', boardSize.col)}
-                        isNinARowValid={isValidNumber('nInARows', nInARow)}
-                        shouldDisabledButtonBoardSize={boardSize.row < 4 || boardSize.col < 4 || nInARow < 2}
+                        isWinCountValid={isValidNumber('winCount', winCount)}
                     />
                 }
             </div>
@@ -184,7 +160,7 @@ const Game = () => {
         return (
             <Grid container>
                 <Grid className={'playerOne-container'} item xs={2}>
-                    <DisplayPlayerScore
+                    <PlayerScore
                         player={playersProps.playerOne}
                         setPlayer={playersProps.setPlayerOne}
                     />
@@ -193,7 +169,6 @@ const Game = () => {
                     <Board
                         getInjectedComponent={getMoveBallComponent}
                         boardSize={boardSize}
-                        nInARow={nInARow}
                         runOnUpdate={runBoardCheck}
                         shouldReset={winner}
                         restartGame={restartGame}
@@ -202,16 +177,16 @@ const Game = () => {
                     />
                 </Grid>
                 <Grid className={'playerTwo-container'} item xs={2}>
-                    <DisplayPlayerScore
+                    <PlayerScore
                         player={playersProps.playerTwo}
                         setPlayer={playersProps.setPlayerTwo}
                     />
                 </Grid>
                 <Grid className={'winner-container'} item xs={7}>
-                    <Winner
+                    <EndGameInfo
                         winner={winner}
                         playersProps={playersProps}
-                        nInARow={nInARow}
+                        winCount={winCount}
                         moveBallRef={moveBallRef}
                         renderNewRound={renderNewRound}
                         setViewBoard={setViewBoard}
@@ -226,10 +201,10 @@ const Game = () => {
             <div>
                 {viewBoard
                     ? boardPage()
-                    : <Winner
+                    : <EndGameInfo
                         winner={winner}
                         playersProps={playersProps}
-                        nInARow={nInARow}
+                        winCount={winCount}
                         moveBallRef={moveBallRef}
                         renderNewRound={renderNewRound}
                         setViewBoard={setViewBoard}
@@ -241,7 +216,7 @@ const Game = () => {
 
     return (
         <div>
-            <h1>{nInARow} in a row</h1>
+            <h1>{winCount} in a row</h1>
             {gameStarted
                 ? renderBoard()
                 : renderLoginForm()

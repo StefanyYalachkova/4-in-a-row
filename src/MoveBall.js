@@ -1,18 +1,26 @@
 import { Grid } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Board } from "./Board";
-import { areBallObjectsEqual } from "./utils"
+import { areBallObjectsEqual } from "./boardUtils";
+import { A_KEYCODE, DOWN_ARROW, D_KEYCODE, LEFT_ARROW, PLAYER_ONE, PLAYER_TWO, RIGHT_ARROW, S_KEYCODE } from "./constValue";
+
+const getBallInitialValue = (ball, colSize) => {
+    const initialBallPosition = Math.ceil(colSize / 2) - 1;
+    const arrayOfBallInitialValue = [];
+
+    for (let i = 0; i < colSize; i++) {
+        if (i === initialBallPosition) {
+            arrayOfBallInitialValue.push(ball);
+        } else {
+            arrayOfBallInitialValue.push({ isPlayerOneBall: false, isPlayerTwoBall: false });
+        };
+    };
+
+    return arrayOfBallInitialValue;
+};
 
 const MoveBall = React.forwardRef((props, ref) => {
-
-    const RIGHT_ARROW = 39;
-    const LEFT_ARROW = 37;
-    const DOWN_ARROW = 40;
-    const A_KEYCODE = 65;
-    const S_KEYCODE = 83;
-    const D_KEYCODE = 68;
-
-    const INITIAL_VALUE = Math.ceil(props.colSize / 2) - 1;
+    const { colSize } = props;
+    const initialBallPosition = Math.ceil(colSize / 2) - 1;
 
     let playerOneBall = { isPlayerOneBall: true, isPlayerTwoBall: false };
     let playerTwoBall = { isPlayerOneBall: false, isPlayerTwoBall: true };
@@ -32,6 +40,8 @@ const MoveBall = React.forwardRef((props, ref) => {
         }
     };
 
+    const [ballController, setBallController] = useState(getBallInitialValue(playerOneBall, colSize));
+
     useEffect(() => {
         if ((ref || {}).current) {
             (ref || {}).current.focus();
@@ -40,16 +50,18 @@ const MoveBall = React.forwardRef((props, ref) => {
 
     useEffect(() => {
         if (props.shouldStop) {
-            const copy = [...array];
+            const copy = [...ballController];
             const currentBallPosition = getCurrentBallPosition();
             copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: false };
 
-            setArray(copy);
+            setBallController(copy);
         };
+    }, [props.shouldStop]);
 
+    useEffect(() => {
         if (props.shouldRestartGame) {
-            const copy = [...array];
-            const currentBallPosition = INITIAL_VALUE;
+            const copy = [...ballController];
+            const currentBallPosition = initialBallPosition;
 
             if (areBallObjectsEqual(props.winnerBall, playerOneBall)) {
                 copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: true };
@@ -57,31 +69,15 @@ const MoveBall = React.forwardRef((props, ref) => {
                 copy[currentBallPosition] = { isPlayerOneBall: true, isPlayerTwoBall: false };
             };
 
-            setArray(copy);
+            setBallController(copy);
 
             props.afterGameRestart(false);
         };
-    }, [props.shouldStop, props.shouldRestartGame]);
-
-    const getInitialValue = (ball) => {
-        const arrayOfObjects = [];
-
-        for (let i = 0; i < props.colSize; i++) {
-            if (i === INITIAL_VALUE) {
-                arrayOfObjects.push(ball);
-            } else {
-                arrayOfObjects.push({ isPlayerOneBall: false, isPlayerTwoBall: false });
-            };
-        };
-
-        return arrayOfObjects;
-    };
-
-    const [array, setArray] = useState(getInitialValue(playerOneBall));
+    }, [props.shouldRestartGame])
 
     const handlePressKey = (event) => {
 
-        const currentPlayer = ballPlayer.isPlayerOneBall ? 'playerOne' : 'playerTwo';
+        const currentPlayer = ballPlayer.isPlayerOneBall ? PLAYER_ONE : PLAYER_TWO;
         const currentKeys = playerMovement[currentPlayer];
         const { rightMove, leftMove, downMove } = currentKeys;
 
@@ -103,13 +99,13 @@ const MoveBall = React.forwardRef((props, ref) => {
     };
 
     const getCurrentBallPosition = () => {
-        return array.findIndex((object) => (
+        return ballController.findIndex((object) => (
             object.isPlayerOneBall || object.isPlayerTwoBall
         ));
     };
 
     const moveRight = () => {
-        const copy = [...array];
+        const copy = [...ballController];
         const currentBallPosition = getCurrentBallPosition();
 
         if (currentBallPosition !== copy.length - 1) {
@@ -117,11 +113,11 @@ const MoveBall = React.forwardRef((props, ref) => {
             copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: false };
         };
 
-        setArray(copy);
+        setBallController(copy);
     };
 
     const moveLeft = () => {
-        const copy = [...array];
+        const copy = [...ballController];
         const currentBallPosition = getCurrentBallPosition();
 
         if (currentBallPosition !== 0) {
@@ -129,34 +125,32 @@ const MoveBall = React.forwardRef((props, ref) => {
             copy[currentBallPosition] = { isPlayerOneBall: false, isPlayerTwoBall: false };
         };
 
-        setArray(copy);
+        setBallController(copy);
     };
 
     const moveDown = () => {
-
         const position = getCurrentBallPosition();
-        const activeElement = array[position];
+        const activeElement = ballController[position];
 
         if (!props.handleIsLastCellFull(position)) {
             props.handleMoveDown(position, activeElement);
 
             if (ballPlayer.isPlayerOneBall) {
                 setBallPlayer(playerTwoBall);
-                setArray(getInitialValue(playerTwoBall));
+                setBallController(getBallInitialValue(playerTwoBall, colSize));
             } else {
                 setBallPlayer(playerOneBall);
-                setArray(getInitialValue(playerOneBall));
+                setBallController(getBallInitialValue(playerOneBall, colSize));
             };
         };
     };
 
     return (
-        <span className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
-            
+        <div className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
             <Grid className={'firstLine-container'} item xs={12}>
-                {props.displayBoard([array], 'move')}
+                {props.displayBoard([ballController], 'move')}
             </Grid>
-        </span>
+        </div>
     );
 });
 
