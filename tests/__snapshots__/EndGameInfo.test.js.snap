@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EndGameInfo test renders correctly 1`] = `
+<div>
+  <div>
+    <b>
+      Stef
+       wins!
+    </b>
+    <button
+      className="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium css-sghohy-MuiButtonBase-root-MuiButton-root"
+      disabled={false}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onContextMenu={[Function]}
+      onDragLeave={[Function]}
+      onFocus={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      onMouseDown={[Function]}
+      onMouseLeave={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchMove={[Function]}
+      onTouchStart={[Function]}
+      tabIndex={0}
+      type="submit"
+    >
+       New Round 
+    </button>
+  </div>
+</div>
+`;
+
+exports[`EndGameInfo test renders correctly gameOverInfo 1`] = `
+<div>
+  <div
+    className="MuiGrid-root MuiGrid-container css-11lq3yg-MuiGrid-root"
+  >
+    <div
+      className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-7 player-container css-uqwprf-MuiGrid-root"
+    >
+      <div>
+        <h2>
+          Stef
+          : 
+          3
+        </h2>
+      </div>
+    </div>
+    <div
+      className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-1 css-u78q51-MuiGrid-root"
+    />
+    <div
+      className="MuiGrid-root player-container css-vj1n65-MuiGrid-root"
+    >
+      <div>
+        <h2>
+          Angel
+          : 
+          0
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -4,8 +4,14 @@ import { areBallObjectsEqual } from "./boardUtils";
 import { A_KEYCODE, DOWN_ARROW, D_KEYCODE, LEFT_ARROW, PLAYER_ONE, PLAYER_TWO, RIGHT_ARROW, S_KEYCODE } from "./constValue";
 
 const getBallInitialValue = (ball, colSize) => {
-    const initialBallPosition = Math.ceil(colSize / 2) - 1;
     const arrayOfBallInitialValue = [];
+    let initialBallPosition = 0;
+
+    if (colSize <= 2) {
+        initialBallPosition = Math.ceil(colSize / 2);
+    } else {
+        initialBallPosition = Math.ceil(colSize / 2) - 1;
+    };
 
     for (let i = 0; i < colSize; i++) {
         if (i === initialBallPosition) {
@@ -146,7 +152,7 @@ const MoveBall = React.forwardRef((props, ref) => {
     };
 
     return (
-        <div className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
+        <div data-testid="firstLine-container" className={'firstLine-container'} onKeyDown={(e) => { handlePressKey(e) }} tabIndex={0} ref={ref} >
             <Grid className={'firstLine-container'} item xs={12}>
                 {props.displayBoard([ballController], 'move')}
             </Grid>
@@ -154,4 +160,4 @@ const MoveBall = React.forwardRef((props, ref) => {
     );
 });
 
-export { MoveBall };
+export { MoveBall, getBallInitialValue };

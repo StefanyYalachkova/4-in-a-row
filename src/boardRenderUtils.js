@@ -126,4 +126,4 @@ const getLeftDiagonalWinnerCell = (boardSize, winCount) => {
     return result;
 };
 
-export { getWinnerForThisRound };
+export { getWinnerForThisRound, getWinner, initialPosition, getVerticalWinnerCell, getHorizontalWinnerCell, getRightDiagonalWinnerCell, getLeftDiagonalWinnerCell };

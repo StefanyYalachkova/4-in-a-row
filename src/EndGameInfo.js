@@ -20,7 +20,7 @@ const EndGameInfo = (props) => {
             result = (
                 <div>
                     <b>{winner} wins!</b>
-                    <Button variant="contained" type="submit" onClick={() => renderNewRound(newFocusRef, winner)}>New Round</Button>
+                    <Button variant="contained" type="submit" onClick={() => renderNewRound(newFocusRef, winner)}> New Round </Button>
                 </div>
             );
         };

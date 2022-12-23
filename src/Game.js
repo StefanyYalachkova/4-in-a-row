@@ -204,7 +204,6 @@ const Game = () => {
                     : <EndGameInfo
                         winner={winner}
                         playersProps={playersProps}
-                        winCount={winCount}
                         moveBallRef={moveBallRef}
                         renderNewRound={renderNewRound}
                         setViewBoard={setViewBoard}
