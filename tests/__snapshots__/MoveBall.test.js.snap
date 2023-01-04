@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MoveBall test renders correctly 1`] = `
+<div
+  className="firstLine-container"
+  data-testid="firstLine-container"
+  onKeyDown={[Function]}
+  tabIndex={0}
+>
+  <div
+    className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12 firstLine-container css-13i4rnv-MuiGrid-root"
+  />
+</div>
+`;
